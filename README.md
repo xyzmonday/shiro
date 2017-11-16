@@ -1,0 +1,3 @@
+# maven-springmvc-mybatis-shiro
+该项目是主要使用是maven,springmvc，mybatis等流行框架搭建简单的shiro权限控制。学习该项目的主要目的是理解shiro的工作流程和主要配置。
+后续会将该项目使用springBoot整合shiro。
