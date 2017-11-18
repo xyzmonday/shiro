@@ -1,6 +1,7 @@
 package com.yff.mapper;
 
 import com.yff.pojo.User;
+import com.yff.service.UserService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +17,17 @@ import java.util.List;
 public class UserMapperTest {
 
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
     @Test
     public void testQueryRoles() {
-        User user = userMapper.queryRolesByUserName("tom");
+        User user = userService.queryByUserName("tom");
+        System.out.println(user);
+    }
+
+    @Test
+    public void testAOP() {
+        User user = userService.queryByUserName("yff");
         System.out.println(user);
     }
 }

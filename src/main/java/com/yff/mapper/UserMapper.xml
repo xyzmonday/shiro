@@ -6,7 +6,7 @@
 
     <!--查询一个user-->
     <select id="queryByUserName" parameterType="string" resultType="com.yff.pojo.User">
-        SELECT id,username,PASSWORD FROM t_user
+        SELECT id,username,password FROM t_user
         WHERE username = #{username}
     </select>
 

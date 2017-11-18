@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.springframework.org/schema/aop 
                            http://www.springframework.org/schema/aop/spring-aop.xsd
@@ -11,40 +12,70 @@
                            http://www.springframework.org/schema/tx 
                            http://www.springframework.org/schema/tx/spring-tx.xsd">
 
-	<!-- 1. 数据库连接池 -->
-	<!-- 加载配置文件 -->
-	<context:property-placeholder location="classpath:properties/db.properties" />
-	
-	<!-- 数据库连接池 -->
-	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
-		destroy-method="close">
-		<property name="url" value="${jdbc.url}" />
-		<property name="username" value="${jdbc.username}" />
-		<property name="password" value="${jdbc.password}" />
-		<property name="driverClassName" value="${jdbc.driver}" />
-		<property name="maxActive" value="10" />
-		<property name="minIdle" value="5" />
-		
-	</bean>
+    <!-- 1. 数据库连接池 -->
+    <!-- 加载配置文件 -->
+    <context:property-placeholder location="classpath:properties/db.properties"/>
 
-	<!-- 2.sqlSessionFactory -->
-	<!-- 注意FactoryBean 和 BeanFactory的变化，BeanFactory是一个IOC容器
-		 但是FactoryBean是一个Bean,它能够对bean进行修饰，FactoryBean的getBean返回的
-		 是FactoryBean,getObject返回的是真实的Bean
-	 -->
-	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-		<!-- 注入数据源 -->
-		<property name="dataSource" ref="dataSource" />
-		<!-- 配置MyBaties全局配置文件:classpath:mybatis/SqlMapperConfig.xml -->
-		<property name="configLocation" value="classpath:mybatis/SqlMapperConfig.xml" />
-	</bean>
+    <!-- 数据源 -->
+    <!--<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+        destroy-method="close">
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="driverClassName" value="${jdbc.driver}" />
+        <property name="maxActive" value="10" />
+        <property name="minIdle" value="5" />
+    </bean>-->
 
-	<!--3.dao层也就是mapper的扫描器 -->
-	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-		<!-- 扫描的包路径，如果需要多个包中间使用半角的逗号隔开 -->
-		<property name="basePackage" value="com.yff.mapper" />
-		<!-- 注意这里使用sqlSessionFactoryBeanName，如果使用sqlSessionFactory那么数据库配置失效 -->
-		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
-	</bean>
+    <bean id="dataSource1" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="url" value="${jdbc.url-master}"/>
+        <property name="username" value="${jdbc.username-master}"/>
+        <property name="password" value="${jdbc.password-master}"/>
+        <property name="driverClassName" value="${jdbc.driver-master}"/>
+        <property name="maxActive" value="10"/>
+        <property name="minIdle" value="5"/>
+    </bean>
+
+    <bean id="dataSource2" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="url" value="${jdbc.url-slave}"/>
+        <property name="username" value="${jdbc.username-slave}"/>
+        <property name="password" value="${jdbc.password-slave}"/>
+        <property name="driverClassName" value="${jdbc.driver-slave}"/>
+        <property name="maxActive" value="10"/>
+        <property name="minIdle" value="5"/>
+    </bean>
+
+    <!-- 配置多数据源映射关系 -->
+    <bean id="dataSource" class="com.yff.multids.DynamicDataSource">
+        <property name="targetDataSources">
+            <map key-type="java.lang.String">
+                <entry key="dataSource1" value-ref="dataSource1"></entry>
+                <entry key="dataSource2" value-ref="dataSource2"></entry>
+            </map>
+        </property>
+        <!-- 默认目标数据源为你主库数据源 -->
+        <property name="defaultTargetDataSource" ref="dataSource1"/>
+    </bean>
+
+
+    <!-- 2.sqlSessionFactory -->
+    <!-- 注意FactoryBean 和 BeanFactory的变化，BeanFactory是一个IOC容器
+         但是FactoryBean是一个Bean,它能够对bean进行修饰，FactoryBean的getBean返回的
+         是FactoryBean,getObject返回的是真实的Bean
+     -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 注入数据源 -->
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 配置MyBaties全局配置文件:classpath:mybatis/SqlMapperConfig.xml -->
+        <property name="configLocation" value="classpath:mybatis/SqlMapperConfig.xml"/>
+    </bean>
+
+    <!--3.dao层也就是mapper的扫描器 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!-- 扫描的包路径，如果需要多个包中间使用半角的逗号隔开 -->
+        <property name="basePackage" value="com.yff.mapper"/>
+        <!-- 注意这里使用sqlSessionFactoryBeanName，如果使用sqlSessionFactory那么数据库配置失效 -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
 
 </beans>
